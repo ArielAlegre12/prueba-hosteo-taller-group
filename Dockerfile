@@ -10,6 +10,7 @@ RUN a2enmod rewrite
 
 # Copiar proyecto
 COPY . /var/www/html
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # Apache apuntando correctamente a /public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
@@ -21,19 +22,15 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 RUN curl -sS https://getcomposer.org/installer | php \
     && php composer.phar install --no-dev --optimize-autoloader
 
-# 🔥 Crear base de datos SQLite (IMPORTANTE)
+# Crear base de datos SQLite
 RUN mkdir -p /var/www/html/database && \
     touch /var/www/html/database/database.sqlite
 
-# 🔥 Limpiar y cachear config
-RUN php artisan config:clear && \
-    php artisan config:cache
-
-RUN php artisan migrate --force
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 EXPOSE 80
-
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["apache2-foreground"]
