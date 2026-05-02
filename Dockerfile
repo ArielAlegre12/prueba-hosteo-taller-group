@@ -18,6 +18,10 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 RUN curl -sS https://getcomposer.org/installer | php \
     && php composer.phar install --no-dev --optimize-autoloader
 
+# LIMPIAR CACHE (MUY IMPORTANTE)
+RUN php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan config:cache
 # Permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
