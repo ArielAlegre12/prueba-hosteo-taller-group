@@ -29,6 +29,8 @@ RUN mkdir -p /var/www/html/database && \
 RUN php artisan config:clear && \
     php artisan config:cache
 
+RUN php artisan migrate --force
+
 # Permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
