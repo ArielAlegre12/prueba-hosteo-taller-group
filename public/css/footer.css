@@ -137,14 +137,26 @@
 }
 
 @media(max-width: 768px){
+    .footer-content{
+        grid-template-columns: 1fr;
+        gap: 25px;
+        text-align: left;
+    }
+
+    .footer-brand{
+        justify-content: flex-start;
+    }
+
     .footer-links{
         align-items: flex-start;
     }
-    .links-grid {
-        justify-content: flex-start;
+
+    .links-grid{
         grid-template-columns: 1fr;
+        gap: 6px;
     }
+
     .footer-devs{
-        justify-self: start;
+        align-items: flex-start;
     }
 }

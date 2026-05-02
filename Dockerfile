@@ -3,6 +3,7 @@ FROM php:8.4-apache
 # Instalar dependencias
 RUN apt-get update && apt-get install -y \
     libzip-dev zip unzip git curl sqlite3 libsqlite3-dev \
+    imagemagick \
     && docker-php-ext-install pdo pdo_sqlite
 
 # Habilitar rewrite y permitir .htaccess
@@ -22,6 +23,12 @@ RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 # Instalar Composer + dependencias
 RUN curl -sS https://getcomposer.org/installer | php \
     && php composer.phar install --no-dev --optimize-autoloader
+
+# Comprimir imágenes
+RUN find /var/www/html/public/images -type f \( -name "*.jpg" -o -name "*.png" \) | while read img; do \
+    convert "$img" -quality 75 -strip "$img" && \
+    echo "Comprimido: $img"; \
+    done || true
 
 # Crear base de datos SQLite
 RUN mkdir -p /var/www/html/database && \
