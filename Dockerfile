@@ -1,29 +1,26 @@
-FROM php:8.4-cli
+FROM php:8.2-apache
 
 RUN apt-get update && apt-get install -y \
-    git unzip curl libzip-dev zip \
-    && docker-php-ext-install zip \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    libzip-dev zip unzip git curl sqlite3 \
+    && docker-php-ext-install pdo pdo_sqlite
+
+RUN a2enmod rewrite
+
+COPY . /var/www/html
+
+# Apache apuntando correctamente a /public
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
 # Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN curl -sS https://getcomposer.org/installer | php \
+    && php composer.phar install --no-dev --optimize-autoloader
 
-WORKDIR /app
-COPY . .
+# Permisos
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-RUN composer install --no-dev --optimize-autoloader
+EXPOSE 80
 
-RUN npm install
-
-RUN npm run build
-
-RUN cp -r public/build/* public/ || true
-
-RUN cp .env.example .env
-
-RUN php artisan key:generate
-
-EXPOSE 10000
-
-CMD php -S 0.0.0.0:10000 -t public
+CMD ["apache2-foreground"]
