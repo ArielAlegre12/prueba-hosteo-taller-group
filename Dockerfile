@@ -27,7 +27,6 @@ RUN mkdir -p /var/www/html/database && \
 
 # 🔥 Limpiar y cachear config
 RUN php artisan config:clear && \
-    php artisan cache:clear && \
     php artisan config:cache
 
 # Permisos
