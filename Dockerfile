@@ -5,8 +5,9 @@ RUN apt-get update && apt-get install -y \
     libzip-dev zip unzip git curl sqlite3 libsqlite3-dev \
     && docker-php-ext-install pdo pdo_sqlite
 
-# Habilitar rewrite
-RUN a2enmod rewrite
+# Habilitar rewrite y permitir .htaccess
+RUN a2enmod rewrite && \
+    sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # Copiar proyecto
 COPY . /var/www/html
